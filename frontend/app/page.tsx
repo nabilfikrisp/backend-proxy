@@ -1,7 +1,22 @@
-import { encrypt } from "@backend-proxy/shared";
+"use client";
+
+import { apiProxy } from "@/utils/api-proxy";
+import { useEffect } from "react";
 
 export default function Home() {
-  const encrypted = encrypt("Hello, World!");
+  useEffect(() => {
+    const requestData = async () => {
+      const people = await apiProxy.get("/api/people");
+      console.log("PROXY GET:", people);
 
-  return <h1 className="text-3xl font-bold">{encrypted}</h1>;
+      const echo = await apiProxy.post("/api/echo", {
+        message: "Hello, backend!",
+      });
+      console.log("PROXY POST:", echo);
+    };
+
+    requestData();
+  }, []);
+
+  return <h1 className="text-3xl font-bold">Check console log</h1>;
 }

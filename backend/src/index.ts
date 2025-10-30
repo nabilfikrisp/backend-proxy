@@ -4,12 +4,14 @@ import people from "./data.json" with { type: "json" };
 
 const app = new Hono();
 
-app.get("/", (c) => {
-  return c.text("Hello Hono!");
-});
 
 app.get("/api/people", (c) => {
   return c.json(people);
+});
+
+app.post("/api/echo", async (c) => {
+  const reqBody = await c.req.json();
+  return c.json({ received: reqBody });
 });
 
 serve(
