@@ -1,5 +1,6 @@
 import { EncryptedProxyRequest } from "@backend-proxy/shared";
 
+// THIS NEED TO BE IN ENV
 const BACKEND_PROXY = "http://localhost:3001/api/proxy";
 
 export async function POST(req: Request) {
