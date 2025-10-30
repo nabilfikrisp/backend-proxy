@@ -1,5 +1,5 @@
 {
-  "name": "frontend",
+  "name": "@backend-proxy/frontend",
   "version": "0.1.0",
   "private": true,
   "scripts": {
@@ -11,7 +11,8 @@
   "dependencies": {
     "react": "19.2.0",
     "react-dom": "19.2.0",
-    "next": "16.0.1"
+    "next": "16.0.1",
+    "@backend-proxy/shared": "workspace:*"
   },
   "devDependencies": {
     "typescript": "^5",

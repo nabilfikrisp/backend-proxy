@@ -1,0 +1,8 @@
+# Common ignores
+node_modules/
+dist/
+*.tsbuildinfo
+
+# Env files
+.env
+.env.*
