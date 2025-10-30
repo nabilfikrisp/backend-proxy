@@ -8,6 +8,11 @@
     "build": "tsc -b"
   },
   "devDependencies": {
+    "@types/crypto-js": "^4.2.2",
+    "@types/node": "^24.9.2",
     "typescript": "^5.9.3"
+  },
+  "dependencies": {
+    "crypto-js": "^4.2.0"
   }
 }

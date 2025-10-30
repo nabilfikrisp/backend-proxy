@@ -1,3 +1,11 @@
+export type EncryptedProxyRequest = {
+  encrypted: string;
+};
+
+export type EncryptedProxyResponse = EncryptedProxyRequest & {
+  status: number;
+};
+
 export type ProxyRequest = {
   url: string;
   method: HttpMethod;

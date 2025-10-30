@@ -1,21 +1,30 @@
-import { ProxyRequest } from "@/types/proxy.type";
+import { decrypt, encrypt } from "@backend-proxy/shared";
+import {
+  EncryptedProxyResponse,
+  ProxyRequest,
+} from "@backend-proxy/shared/dist/proxy.contract.type";
 
-const API_BASE = "/api/proxy";
+const NEXT_API_PROXY = "/api/proxy";
 
 async function request(proxyRequest: ProxyRequest) {
-  const res = await fetch(API_BASE, {
+  const encrypted = encrypt(JSON.stringify(proxyRequest));
+
+  const res = await fetch(NEXT_API_PROXY, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
     },
-    body: JSON.stringify(proxyRequest),
+    body: JSON.stringify({ encrypted }),
   });
 
   if (!res.ok) {
     throw new Error(`API Proxy request failed with status ${res.status}`);
   }
 
-  return await res.json();
+  const data: EncryptedProxyResponse = await res.json();
+  const decrypted = decrypt(data.encrypted);
+
+  return JSON.parse(decrypted);
 }
 
 export const apiProxy = {

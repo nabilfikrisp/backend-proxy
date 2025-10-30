@@ -18,5 +18,9 @@ export default function Home() {
     requestData();
   }, []);
 
-  return <h1 className="text-3xl font-bold">Check console log</h1>;
+  return (
+    <h1 className="text-3xl font-bold">
+      Check console log and network devtools
+    </h1>
+  );
 }

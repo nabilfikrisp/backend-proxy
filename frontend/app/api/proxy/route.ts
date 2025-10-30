@@ -1,17 +1,17 @@
-import { ProxyRequest } from "@/types/proxy.type";
+import { EncryptedProxyRequest } from "@backend-proxy/shared";
 
-const BACKEND_BASE = "http://localhost:3001";
+const BACKEND_PROXY = "http://localhost:3001/api/proxy";
 
 export async function POST(req: Request) {
   try {
-    const { url, method = "GET", body }: ProxyRequest = await req.json();
+    const encryptedProxyRequest: EncryptedProxyRequest = await req.json();
 
-    const backendRes = await fetch(BACKEND_BASE + url, {
-      method,
+    const backendRes = await fetch(BACKEND_PROXY, {
+      method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
-      body: body ? JSON.stringify(body) : undefined,
+      body: JSON.stringify(encryptedProxyRequest),
     });
 
     const data = await backendRes.json();
