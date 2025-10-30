@@ -1,0 +1,6 @@
+{
+  "name": "@backend-proxy/shared",
+  "version": "1.0.0",
+  "main": "./crypto.ts",
+  "type": "module"
+}

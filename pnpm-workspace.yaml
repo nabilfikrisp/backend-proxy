@@ -1,0 +1,8 @@
+packages:
+  - frontend
+  - backend
+  - shared
+
+onlyBuiltDependencies:
+  - sharp
+  - unrs-resolver
