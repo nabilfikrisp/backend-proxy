@@ -1,4 +1,10 @@
-import { encrypt, decrypt } from "./crypto.js";
+import { encrypt, decrypt, signPayload, verifySignature } from "./crypto.js";
 import type { EncryptedProxyRequest } from "./proxy.contract.type.js";
 
-export { encrypt, decrypt, EncryptedProxyRequest };
+export {
+  encrypt,
+  decrypt,
+  EncryptedProxyRequest,
+  signPayload,
+  verifySignature,
+};

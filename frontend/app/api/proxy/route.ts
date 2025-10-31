@@ -1,8 +1,10 @@
-import { decrypt, encrypt, EncryptedProxyRequest } from "@backend-proxy/shared";
 import {
+  decrypt,
+  encrypt,
+  EncryptedProxyRequest,
   signPayload,
   verifySignature,
-} from "@backend-proxy/shared/dist/crypto";
+} from "@backend-proxy/shared";
 
 const BACKEND_PROXY = process.env.BACKEND_PROXY!;
 const SECRET_KEY = process.env.SECRET_KEY!;
