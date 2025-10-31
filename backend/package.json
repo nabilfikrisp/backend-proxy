@@ -7,9 +7,10 @@
     "start": "node dist/index.js"
   },
   "dependencies": {
+    "@backend-proxy/shared": "workspace:*",
     "@hono/node-server": "^1.19.5",
-    "hono": "^4.10.4",
-    "@backend-proxy/shared": "workspace:*"
+    "dotenv": "^17.2.3",
+    "hono": "^4.10.4"
   },
   "devDependencies": {
     "@types/node": "^20.11.17",

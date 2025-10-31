@@ -5,9 +5,10 @@ import {
 } from "@backend-proxy/shared/dist/proxy.contract.type";
 
 const NEXT_API_PROXY = "/api/proxy";
+const PUBLIC_KEY = process.env.NEXT_PUBLIC_PUBLIC_KEY!;
 
 async function request(proxyRequest: ProxyRequest) {
-  const encrypted = encrypt(JSON.stringify(proxyRequest));
+  const encrypted = encrypt(JSON.stringify(proxyRequest), PUBLIC_KEY);
 
   const res = await fetch(NEXT_API_PROXY, {
     method: "POST",
@@ -22,7 +23,8 @@ async function request(proxyRequest: ProxyRequest) {
   }
 
   const data: EncryptedProxyResponse = await res.json();
-  const decrypted = decrypt(data.encrypted);
+
+  const decrypted = decrypt(data.encrypted, PUBLIC_KEY);
 
   return JSON.parse(decrypted);
 }

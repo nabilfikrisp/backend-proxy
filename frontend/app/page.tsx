@@ -21,10 +21,10 @@ export default function Home() {
         console.log("PROXY GET:", people);
         setPeople(people);
 
-        const echo = await apiProxy.post("/api/echo", {
-          message: "Hello, backend!",
-        });
-        console.log("PROXY POST:", echo);
+        // const echo = await apiProxy.post("/api/echo", {
+        //   message: "Hello, backend!",
+        // });
+        // console.log("PROXY POST:", echo);
       };
 
       requestData();
