@@ -23,7 +23,6 @@ async function request(proxyRequest: ProxyRequest) {
   }
 
   const data: EncryptedProxyResponse = await res.json();
-
   const decrypted = decrypt(data.encrypted, PUBLIC_KEY);
 
   return JSON.parse(decrypted);
