@@ -14,7 +14,10 @@ import { people } from "../data/people.js";
 
 import "dotenv/config";
 import type { ContentfulStatusCode } from "hono/utils/http-status";
-import { verifySignature } from "@backend-proxy/shared/dist/crypto.js";
+import {
+  signPayload,
+  verifySignature,
+} from "@backend-proxy/shared/dist/crypto.js";
 
 const SECRET_KEY = process.env.SECRET_KEY!;
 const INTERNAL_KEY = process.env.INTERNAL_KEY!;
@@ -44,15 +47,29 @@ app.post("/api/proxy", async (c) => {
       !verifySignature(encryptedReq.encrypted, signatureHeader, INTERNAL_KEY)
     ) {
       const errorData = { error: "Unauthorized" };
-      const encryptedResponse = encrypt(JSON.stringify(errorData), SECRET_KEY);
-      return c.json({ encrypted: encryptedResponse }, 401);
+      const encryptedError = encrypt(JSON.stringify(errorData), SECRET_KEY);
+      const signature = signPayload(encryptedError, INTERNAL_KEY);
+      return c.json(
+        { encrypted: encryptedError },
+        {
+          status: 401,
+          headers: { "X-Signature": signature },
+        }
+      );
     }
 
     // Validate encrypted payload
     if (!encryptedReq.encrypted || typeof encryptedReq.encrypted !== "string") {
       const errorData = { error: "Invalid encrypted payload" };
       const encryptedError = encrypt(JSON.stringify(errorData), SECRET_KEY);
-      return c.json({ encrypted: encryptedError }, 400);
+      const signature = signPayload(encryptedError, INTERNAL_KEY);
+      return c.json(
+        { encrypted: encryptedError },
+        {
+          status: 401,
+          headers: { "X-Signature": signature },
+        }
+      );
     }
 
     let decrypted: ProxyRequest;
@@ -61,28 +78,56 @@ app.post("/api/proxy", async (c) => {
       if (!decryptedStr) {
         const errorData = { error: "Decryption returned empty string" };
         const encryptedError = encrypt(JSON.stringify(errorData), SECRET_KEY);
-        return c.json({ encrypted: encryptedError }, 400);
+        const signature = signPayload(encryptedError, INTERNAL_KEY);
+        return c.json(
+          { encrypted: encryptedError },
+          {
+            status: 401,
+            headers: { "X-Signature": signature },
+          }
+        );
       }
       decrypted = JSON.parse(decryptedStr);
     } catch (e) {
       console.error("❌ Decrypt failed:", e);
       const errorData = { error: "Failed to decrypt payload" };
       const encryptedError = encrypt(JSON.stringify(errorData), SECRET_KEY);
-      return c.json({ encrypted: encryptedError }, 400);
+      const signature = signPayload(encryptedError, INTERNAL_KEY);
+      return c.json(
+        { encrypted: encryptedError },
+        {
+          status: 401,
+          headers: { "X-Signature": signature },
+        }
+      );
     }
 
     const { url, method, body } = decrypted;
     if (!url || !method) {
       const errorData = { error: "Missing url or method in request" };
       const encryptedError = encrypt(JSON.stringify(errorData), SECRET_KEY);
-      return c.json({ encrypted: encryptedError }, 400);
+      const signature = signPayload(encryptedError, INTERNAL_KEY);
+      return c.json(
+        { encrypted: encryptedError },
+        {
+          status: 401,
+          headers: { "X-Signature": signature },
+        }
+      );
     }
 
     const isRelative = url.startsWith("/");
     if (!isRelative) {
       const errorData = { error: "Only relative URLs allowed" };
       const encryptedError = encrypt(JSON.stringify(errorData), SECRET_KEY);
-      return c.json({ encrypted: encryptedError }, 400);
+      const signature = signPayload(encryptedError, INTERNAL_KEY);
+      return c.json(
+        { encrypted: encryptedError },
+        {
+          status: 401,
+          headers: { "X-Signature": signature },
+        }
+      );
     }
 
     // Route the request internally
@@ -94,16 +139,28 @@ app.post("/api/proxy", async (c) => {
 
     const jsonData = await internalRes.json();
     const reEncrypted = encrypt(JSON.stringify(jsonData), SECRET_KEY);
+    const signature = signPayload(reEncrypted, INTERNAL_KEY);
 
     return c.json(
       { encrypted: reEncrypted },
-      internalRes.status as ContentfulStatusCode
+      {
+        status: internalRes.status as ContentfulStatusCode,
+        headers: { "X-Signature": signature },
+      }
     );
   } catch (err) {
     console.error("Proxy error:", err);
     const errorData = { error: "Decryption or routing failed" };
     const encryptedError = encrypt(JSON.stringify(errorData), SECRET_KEY);
-    return c.json({ encrypted: encryptedError }, 500);
+    const signature = signPayload(encryptedError, INTERNAL_KEY);
+
+    return c.json(
+      { encrypted: encryptedError },
+      {
+        status: 500,
+        headers: { "X-Signature": signature },
+      }
+    );
   }
 });
 

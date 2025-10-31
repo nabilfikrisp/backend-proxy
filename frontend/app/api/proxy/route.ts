@@ -1,5 +1,8 @@
 import { decrypt, encrypt, EncryptedProxyRequest } from "@backend-proxy/shared";
-import { signPayload } from "@backend-proxy/shared/dist/crypto";
+import {
+  signPayload,
+  verifySignature,
+} from "@backend-proxy/shared/dist/crypto";
 
 const BACKEND_PROXY = process.env.BACKEND_PROXY!;
 const SECRET_KEY = process.env.SECRET_KEY!;
@@ -23,6 +26,16 @@ export async function POST(request: Request) {
     });
 
     const data = await backendRes.json();
+
+    const responseSignature = backendRes.headers.get("X-Signature");
+    if (
+      !responseSignature ||
+      !verifySignature(data.encrypted, responseSignature, INTERNAL_KEY)
+    ) {
+      const errorData = { error: "Unauthorized" };
+      const encryptedError = encrypt(JSON.stringify(errorData), PUBLIC_KEY);
+      return Response.json({ encrypted: encryptedError }, { status: 401 });
+    }
 
     const decryptedData = decrypt(data.encrypted, SECRET_KEY);
     const reEncryptedData = encrypt(decryptedData, PUBLIC_KEY);
