@@ -1,9 +1,11 @@
 export type EncryptedProxyRequest = {
   encrypted: string;
+  signature: string;
 };
 
 export type EncryptedProxyResponse = {
   encrypted: string;
+  signature: string;
 };
 
 export type ProxyRequest = {

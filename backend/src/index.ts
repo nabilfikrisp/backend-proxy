@@ -14,6 +14,7 @@ import { people } from "../data/people.js";
 
 import "dotenv/config";
 import type { ContentfulStatusCode } from "hono/utils/http-status";
+import { verifySignature } from "@backend-proxy/shared/dist/crypto.js";
 
 const SECRET_KEY = process.env.SECRET_KEY!;
 const INTERNAL_KEY = process.env.INTERNAL_KEY!;
@@ -36,9 +37,12 @@ app.use(
 app.post("/api/proxy", async (c) => {
   try {
     const encryptedReq: EncryptedProxyRequest = await c.req.json();
-    const reqInternalKey = c.req.header("X-Internal-Key");
+    const signatureHeader = c.req.header("X-Signature");
 
-    if (reqInternalKey !== INTERNAL_KEY) {
+    if (
+      !signatureHeader ||
+      !verifySignature(encryptedReq.encrypted, signatureHeader, INTERNAL_KEY)
+    ) {
       const errorData = { error: "Unauthorized" };
       const encryptedResponse = encrypt(JSON.stringify(errorData), SECRET_KEY);
       return c.json({ encrypted: encryptedResponse }, 401);
