@@ -13,8 +13,10 @@ import { customLogger } from "./logger.js";
 import { people } from "../data/people.js";
 
 import "dotenv/config";
+import type { ContentfulStatusCode } from "hono/utils/http-status";
 
 const SECRET_KEY = process.env.SECRET_KEY!;
+const INTERNAL_KEY = process.env.INTERNAL_KEY!;
 
 const app = new Hono();
 
@@ -34,28 +36,49 @@ app.use(
 app.post("/api/proxy", async (c) => {
   try {
     const encryptedReq: EncryptedProxyRequest = await c.req.json();
+    const reqInternalKey = c.req.header("X-Internal-Key");
+
+    if (reqInternalKey !== INTERNAL_KEY) {
+      const errorData = { error: "Unauthorized" };
+      const encryptedResponse = encrypt(JSON.stringify(errorData), SECRET_KEY);
+      return c.json({ encrypted: encryptedResponse }, 401);
+    }
 
     // Validate encrypted payload
     if (!encryptedReq.encrypted || typeof encryptedReq.encrypted !== "string") {
-      throw new Error("Invalid encrypted payload");
+      const errorData = { error: "Invalid encrypted payload" };
+      const encryptedError = encrypt(JSON.stringify(errorData), SECRET_KEY);
+      return c.json({ encrypted: encryptedError }, 400);
     }
 
     let decrypted: ProxyRequest;
     try {
       const decryptedStr = decrypt(encryptedReq.encrypted, SECRET_KEY);
-      if (!decryptedStr) throw new Error("Empty decryption result");
+      if (!decryptedStr) {
+        const errorData = { error: "Decryption returned empty string" };
+        const encryptedError = encrypt(JSON.stringify(errorData), SECRET_KEY);
+        return c.json({ encrypted: encryptedError }, 400);
+      }
       decrypted = JSON.parse(decryptedStr);
     } catch (e) {
       console.error("❌ Decrypt failed:", e);
-      return c.json({ error: "Failed to decrypt payload" }, 400);
+      const errorData = { error: "Failed to decrypt payload" };
+      const encryptedError = encrypt(JSON.stringify(errorData), SECRET_KEY);
+      return c.json({ encrypted: encryptedError }, 400);
     }
 
     const { url, method, body } = decrypted;
-    if (!url || !method) throw new Error("Missing url or method in payload");
+    if (!url || !method) {
+      const errorData = { error: "Missing url or method in request" };
+      const encryptedError = encrypt(JSON.stringify(errorData), SECRET_KEY);
+      return c.json({ encrypted: encryptedError }, 400);
+    }
 
     const isRelative = url.startsWith("/");
     if (!isRelative) {
-      return c.json({ error: "Only relative URLs allowed" }, 400);
+      const errorData = { error: "Only relative URLs allowed" };
+      const encryptedError = encrypt(JSON.stringify(errorData), SECRET_KEY);
+      return c.json({ encrypted: encryptedError }, 400);
     }
 
     // Route the request internally
@@ -68,12 +91,18 @@ app.post("/api/proxy", async (c) => {
     const jsonData = await internalRes.json();
     const reEncrypted = encrypt(JSON.stringify(jsonData), SECRET_KEY);
 
-    return c.json({ encrypted: reEncrypted, status: internalRes.status });
+    return c.json(
+      { encrypted: reEncrypted },
+      internalRes.status as ContentfulStatusCode
+    );
   } catch (err) {
     console.error("Proxy error:", err);
-    return c.json({ error: "Decryption or routing failed" }, 500);
+    const errorData = { error: "Decryption or routing failed" };
+    const encryptedError = encrypt(JSON.stringify(errorData), SECRET_KEY);
+    return c.json({ encrypted: encryptedError }, 500);
   }
 });
+
 app.get("/api/people", (c) => {
   return c.json(people);
 });

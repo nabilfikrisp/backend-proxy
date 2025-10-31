@@ -2,8 +2,8 @@ export type EncryptedProxyRequest = {
   encrypted: string;
 };
 
-export type EncryptedProxyResponse = EncryptedProxyRequest & {
-  status: number;
+export type EncryptedProxyResponse = {
+  encrypted: string;
 };
 
 export type ProxyRequest = {
