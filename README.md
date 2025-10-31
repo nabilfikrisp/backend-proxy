@@ -92,13 +92,10 @@ Hono backend with proxy endpoint.
 **Frontend (.env)**
 
 ```env
+<!-- PUBLIC -->
 NEXT_PUBLIC_PUBLIC_KEY=<base64_public_key>
-```
 
-**Next.js Proxy (.env.local)**
-
-```env
-NEXT_PUBLIC_PUBLIC_KEY=<base64_public_key>
+<!-- SECRET -->
 SECRET_KEY=<base64_secret_key>
 INTERNAL_KEY=<base64_hmac_key>
 BACKEND_PROXY=http://localhost:3001/api/proxy
