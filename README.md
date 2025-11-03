@@ -1,6 +1,6 @@
-# Backend Proxy
+# Encrypted API Proxy
 
-A monorepo that encrypts frontend requests through a Next.js proxy to hide backend URLs and sensitive data from browser DevTools.
+A monorepo setup that securely encrypts frontend API requests and routes them through a Next.js proxy, preventing exposure of backend URLs and sensitive data in browser DevTools.
 
 ## ✅ Security Features
 
