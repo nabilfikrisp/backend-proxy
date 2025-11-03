@@ -42,6 +42,11 @@ Frontend
 ![Network Tab Payload Screenshot](images/payload.png)
 ![Network Tab Response Screenshot](images/response.png)
 
+- **Data and Usage**
+
+![Data on Console Log](images/clg.png)
+![Code](images/code.png)
+
 ## 📁 Structure
 
 ```

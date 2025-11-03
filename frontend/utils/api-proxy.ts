@@ -8,24 +8,27 @@ const NEXT_API_PROXY = "/api/proxy";
 const PUBLIC_KEY = process.env.NEXT_PUBLIC_PUBLIC_KEY!;
 
 async function request(proxyRequest: ProxyRequest) {
-  const encrypted = encrypt(JSON.stringify(proxyRequest), PUBLIC_KEY);
+  try {
+    const encrypted = encrypt(JSON.stringify(proxyRequest), PUBLIC_KEY);
 
-  const res = await fetch(NEXT_API_PROXY, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({ encrypted }),
-  });
+    const res = await fetch(NEXT_API_PROXY, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ encrypted }),
+    });
 
-  if (!res.ok) {
-    throw new Error(`API Proxy request failed with status ${res.status}`);
+    const data: EncryptedProxyResponse = await res.json();
+    const decrypted = decrypt(data.encrypted, PUBLIC_KEY);
+
+    return JSON.parse(decrypted);
+  } catch (error) {
+    if (error instanceof Error) {
+      throw new Error(`Request failed: ${error.message}`);
+    }
+    throw new Error(`Request failed: ${String(error)}`);
   }
-
-  const data: EncryptedProxyResponse = await res.json();
-  const decrypted = decrypt(data.encrypted, PUBLIC_KEY);
-
-  return JSON.parse(decrypted);
 }
 
 export const apiProxy = {

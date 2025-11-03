@@ -19,12 +19,16 @@ export default function Home() {
       return response as Person[];
     },
   });
-  if (!data) {
-    return <p>Loading...</p>;
-  }
+
   if (error) {
     return <p>Error: {error.message}</p>;
   }
+
+  if (!data) {
+    return <p>Loading...</p>;
+  }
+
+  console.log(data);
   return (
     <div>
       <h1 className="text-3xl font-bold">
