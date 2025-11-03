@@ -4,5 +4,6 @@ packages:
   - shared
 
 onlyBuiltDependencies:
+  - esbuild
   - sharp
   - unrs-resolver
