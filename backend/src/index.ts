@@ -19,13 +19,14 @@ import type { ContentfulStatusCode } from "hono/utils/http-status";
 import { proxyResponse } from "./utils.js";
 
 const SECRET_KEY = process.env.SECRET_KEY!;
+const SIGNATURE_KEY = process.env.SIGNATURE_KEY!;
 const INTERNAL_KEY = process.env.INTERNAL_KEY!;
 
 const app = new Hono();
 
 app.use("*", customLogger);
 app.use(
-  "/api/*",
+  "/internal/api/*",
   cors({
     origin: process.env.FRONTEND_PROXY!,
     allowHeaders: ["X-Custom-Header", "Content-Type", "Authorization"],
@@ -36,6 +37,16 @@ app.use(
   })
 );
 
+app.use("/internal/*", async (c, next) => {
+  const internalKey = c.req.header("X-Internal-Key");
+
+  if (internalKey !== INTERNAL_KEY) {
+    return c.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  await next();
+});
+
 app.post("/api/proxy", async (c) => {
   try {
     const encryptedReq: EncryptedProxyRequest = await c.req.json();
@@ -43,7 +54,7 @@ app.post("/api/proxy", async (c) => {
 
     if (
       !signatureHeader ||
-      !verifySignature(encryptedReq.encrypted, signatureHeader, INTERNAL_KEY)
+      !verifySignature(encryptedReq.encrypted, signatureHeader, SIGNATURE_KEY)
     ) {
       const errorData = { error: "Unauthorized" };
       return proxyResponse(c, {
@@ -97,7 +108,7 @@ app.post("/api/proxy", async (c) => {
     if (!isRelative) {
       const errorData = { error: "Only relative URLs allowed" };
       const encryptedError = encrypt(JSON.stringify(errorData), SECRET_KEY);
-      const signature = signPayload(encryptedError, INTERNAL_KEY);
+      const signature = signPayload(encryptedError, SIGNATURE_KEY);
       return c.json(
         { encrypted: encryptedError },
         {
@@ -108,11 +119,23 @@ app.post("/api/proxy", async (c) => {
     }
 
     // Route the request internally
-    const internalRes = await app.request(url, {
+
+    const internalRes = await app.request("/internal" + url, {
       method,
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Content-Type": "application/json",
+        "X-Internal-Key": INTERNAL_KEY,
+      },
       body: body ? JSON.stringify(body) : undefined,
     });
+
+    if (internalRes.status === 404) {
+      const errorData = { error: "Internal route not found" };
+      return proxyResponse(c, {
+        data: errorData,
+        status: 404,
+      });
+    }
 
     const jsonData = await internalRes.json();
 
@@ -131,11 +154,11 @@ app.post("/api/proxy", async (c) => {
   }
 });
 
-app.get("/api/people", (c) => {
+app.get("/internal/api/people", (c) => {
   return c.json(people);
 });
 
-app.post("/api/echo", async (c) => {
+app.post("/internal/api/echo", async (c) => {
   const reqBody = await c.req.json();
   return c.json({ received: reqBody });
 });

@@ -16,11 +16,11 @@ A monorepo that encrypts frontend requests through a Next.js proxy to hide backe
 ```
 Frontend
   ↓ [encrypt with public key]
-Next.js API (/api/proxy)
+Next.js API (http://localhost:3000/api/proxy)
   ↓ [decrypt + re-encrypt with secret key]
-Backend API (/api/proxy)
+Backend API (http://localhost:3001/api/proxy)
   ↓ [decrypt + route internal request]
-Internal API (e.g., /api/people)
+Internal API (e.g., /internal/api/people)
   ↓ [encrypt response + sign]
 Backend API
   ↓ [decrypt + re-encrypt + sign]
@@ -28,6 +28,19 @@ Next.js API
   ↓ [decrypt + re-encrypt with public key]
 Frontend
 ```
+
+## Screenshots
+
+- **Only `/api/proxy` is visible:**  
+  The frontend never directly accesses backend endpoints. All requests are routed through the proxy.
+
+![Network Tab Headers Screenshot](images/url.png)
+
+- **Encrypted payload and response:**  
+  Request body and Response shows `{ "encrypted": "..." }`, so sensitive data is obfuscated in the network tab.
+
+![Network Tab Payload Screenshot](images/payload.png)
+![Network Tab Response Screenshot](images/response.png)
 
 ## 📁 Structure
 
@@ -97,7 +110,7 @@ NEXT_PUBLIC_PUBLIC_KEY=<base64_public_key>
 
 <!-- SECRET -->
 SECRET_KEY=<base64_secret_key>
-INTERNAL_KEY=<base64_hmac_key>
+SIGNATURE_KEY=<base64_hmac_key>
 BACKEND_PROXY=http://localhost:3001/api/proxy
 ```
 
@@ -105,8 +118,9 @@ BACKEND_PROXY=http://localhost:3001/api/proxy
 
 ```env
 SECRET_KEY=<base64_secret_key>
+SIGNATURE_KEY=<base64_hmac_key>
 INTERNAL_KEY=<base64_hmac_key>
-FRONTEND_PROXY=http://localhost:3000
+FRONTEND_PROXY=http://localhost:3000/api/proxy
 ```
 
 See `.env.example` in each folder for details.
@@ -140,9 +154,3 @@ Header: `X-Signature: hmac_signature`
   "body": null
 }
 ```
-
-## 🛠️ Example Usage
-
-## 📝 License
-
-MIT
