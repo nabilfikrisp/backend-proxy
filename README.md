@@ -59,8 +59,11 @@ pnpm install
 
 # Setup environment variables (see .env.example in each folder)
 
+# Build
+pnpm run build:all
+
 # Run all services
-pnpm run dev
+pnpm run start:all
 ```
 
 Services will start at:

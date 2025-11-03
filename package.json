@@ -5,7 +5,9 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build:all": "pnpm --filter shared build && pnpm --filter frontend build && pnpm --filter backend build",
+    "start:all": "concurrently \"pnpm --filter frontend start\" \"pnpm --filter backend start\""
   },
   "keywords": [],
   "author": "",
@@ -15,5 +17,8 @@
     "frontend",
     "backend",
     "shared"
-  ]
+  ],
+  "devDependencies": {
+    "concurrently": "^9.2.1"
+  }
 }
