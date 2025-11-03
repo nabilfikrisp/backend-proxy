@@ -11,7 +11,7 @@ export type EncryptedProxyResponse = {
 export type ProxyRequest = {
   url: string;
   method: HttpMethod;
-  body?: unknown | undefined;
+  body?: unknown | null;
 };
 
 export const HTTP_METHOD = {
