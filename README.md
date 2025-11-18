@@ -167,7 +167,7 @@ FRONTEND_PROXY=http://localhost:3000/api/proxy
 | **SECRET_KEY**     | Must match the frontend's `SECRET_KEY`; used for decrypting or validating encrypted content. |
 | **SIGNATURE_KEY**  | Must match the frontend's `SIGNATURE_KEY`; used for verifying request signatures.            |
 | **INTERNAL_KEY**   | Key used for internal backend-to-backend route calls to ensure they’re trusted.              |
-| **FRONTEND_PROXY** | Optional proxy routing back to the frontend if needed (e.g., verification or shared tasks).  |
+| **FRONTEND_PROXY** | Origin allowed to call backend proxy route.                                                  |
 
 See `.env.example` in each folder for details.
 
