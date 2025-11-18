@@ -7,9 +7,30 @@ A monorepo setup that securely encrypts frontend API requests and routes them th
 - Double encryption (public key + secret key)
 - HMAC signature on all requests and responses
 - Backend URLs hidden from client
-- Payloads encrypted (invisible in DevTools)
+- Payloads encrypted (obfuscated in DevTools)
 - Relative URLs only (no external requests)
 - Response signature verification
+
+## 🔒 Security Model Overview
+
+- Public Key:
+
+  - Used only for obfuscation. It never grants backend access.
+
+- Secret Key & Signature Key:
+
+  - Used together for secure communication between frontend and backend.
+  - The backend verifies both payload and signature to avoid tampering.
+
+- Internal Key:
+
+  - Protects sensitive internal endpoints that should only be callable from within the backend itself.
+
+- This separation ensures:
+
+  - Public UI can obfuscate or encode data without exposing sensitive keys.
+  - Communication between frontend and backend is authenticated and validated.
+  - Internal backend routes cannot be triggered externally.
 
 ## 🔒 How It Works
 
@@ -44,8 +65,11 @@ Frontend
 
 - **Data and Usage**
 
-![Data on Console Log](images/clg.png)
 ![Code](images/code.png)
+
+- **this is what the `console.log(data)` looks like**.
+
+![Data on Console Log](images/clg.png)
 
 ## 📁 Structure
 
@@ -122,6 +146,13 @@ SIGNATURE_KEY=<base64_hmac_key>
 BACKEND_PROXY=http://localhost:3001/api/proxy
 ```
 
+| Variable                   | Description                                                         |
+| -------------------------- | ------------------------------------------------------------------- |
+| **NEXT_PUBLIC_PUBLIC_KEY** | Public key used for client-side obfuscation. Safe to expose.        |
+| **SECRET_KEY**             | Shared secret key for encrypted communication with the backend.     |
+| **SIGNATURE_KEY**          | Key used to generate request signatures (HMAC) to verify integrity. |
+| **BACKEND_PROXY**          | Next.js API route that proxies requests to the backend.             |
+
 **Backend (.env)**
 
 ```env
@@ -130,6 +161,13 @@ SIGNATURE_KEY=<base64_hmac_key>
 INTERNAL_KEY=<base64_hmac_key>
 FRONTEND_PROXY=http://localhost:3000/api/proxy
 ```
+
+| Variable           | Description                                                                                  |
+| ------------------ | -------------------------------------------------------------------------------------------- |
+| **SECRET_KEY**     | Must match the frontend's `SECRET_KEY`; used for decrypting or validating encrypted content. |
+| **SIGNATURE_KEY**  | Must match the frontend's `SIGNATURE_KEY`; used for verifying request signatures.            |
+| **INTERNAL_KEY**   | Key used for internal backend-to-backend route calls to ensure they’re trusted.              |
+| **FRONTEND_PROXY** | Optional proxy routing back to the frontend if needed (e.g., verification or shared tasks).  |
 
 See `.env.example` in each folder for details.
 
