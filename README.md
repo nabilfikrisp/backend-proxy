@@ -11,7 +11,7 @@ On HTTP-only internal networks, every API call is exposed in two critical ways:
 1. **Network traffic is unencrypted** - Visible to anyone with packet capture tools
 2. **DevTools exposes everything** - All backend URLs, request payloads, and response data are visible
 
-This means sensitive business data, internal endpoints, and system architecture are all accessible to anyone on the company network—not ideal for HR systems, financial apps, or proprietary tools.
+This means sensitive business data, internal endpoints, and system architecture are all accessible to anyone on the company network, not ideal for HR systems, financial apps, or proprietary tools.
 
 ## 💡 The Solution
 
@@ -47,7 +47,7 @@ A double-encrypted proxy layer with HMAC signature verification that:
 
 - **Internal Key:**
   - Protects sensitive internal endpoints that should only be callable from within the backend itself.
-  - Ensures external requests cannot trigger internal-only routes.
+  - Ensures external requests cannot trigger internal only routes.
 
 **This separation ensures:**
 
@@ -292,15 +292,15 @@ Building this project taught me:
 
 **Use this when:**
 
-- ✅ Working with HTTP-only internal networks
-- ✅ Integrating third-party APIs that expose sensitive keys
+- ✅ Working with HTTP only internal networks
+- ✅ Integrating third party APIs that expose sensitive keys
 - ✅ Legacy systems where refactoring isn't feasible
 - ✅ Microservices requiring encrypted communication
-- ✅ Client-side API calls that must happen in the browser
+- ✅ Client side API calls that must happen in the browser
 
 **Don't use this when:**
 
-- ❌ You can use server-side data fetching (Next.js Server Actions, Nuxt Server Routes, etc.)
+- ❌ You can use server side data fetching (Next.js Server Actions, Nuxt Server Routes, etc.)
 - ❌ HTTPS is available and sufficient for your security needs
 - ❌ You're building a greenfield project with modern frameworks
 
